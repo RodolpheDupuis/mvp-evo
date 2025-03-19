@@ -1,17 +1,21 @@
+// src/app/api/auth/[...nextauth]/route.ts
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { auth } from "@/app/lib/firebaseAdmin";
 import { Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { PrismaClient } from "@prisma/client";
+import { syncUserWithDatabase } from "@/app/lib/userSync";
+
+const prisma = new PrismaClient();
 
 // Extend the built-in Session type to include user.id
 declare module "next-auth" {
   interface Session {
     user: {
-      name?: string | null;
+      id: string;
       email?: string | null;
-      image?: string | null;
-      id?: string;
     };
   }
 }
@@ -31,6 +35,11 @@ export const authOptions: AuthOptions = {
           }
           const userRecord = await auth.getUserByEmail(credentials.email);
           if (!userRecord) throw new Error("User not found");
+          
+          // Sync the Firebase user with our Prisma database
+          // Convert undefined to null to match the function signature
+          await syncUserWithDatabase(userRecord.uid, userRecord.email || null);
+          
           return { id: userRecord.uid, email: userRecord.email };
         } catch (error) {
           throw new Error("Invalid credentials");
@@ -38,6 +47,7 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
+  adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" as const },
   callbacks: {
     async session({ session, token }: { session: Session; token: JWT }) {
