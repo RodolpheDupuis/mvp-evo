@@ -1,0 +1,45 @@
+{
+  "app": {
+    "title": "MVP Évolution",
+    "description": "Votre application de nouvelle génération"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "logout": "Déconnexion"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "loginButton": "Se connecter",
+    "registerButton": "S'inscrire",
+    "nameLabel": "Nom"
+  },
+  "profile": {
+    "title": "Profil",
+    "bio": "Biographie",
+    "phoneNumber": "Numéro de téléphone",
+    "updateProfile": "Mettre à jour le profil"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "theme": "Thème",
+    "notifications": "Notifications",
+    "save": "Enregistrer les modifications"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Succès !",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier"
+  }
+}

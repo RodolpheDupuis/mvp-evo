@@ -1,0 +1,45 @@
+{
+  "app": {
+    "title": "MVP 에볼루션",
+    "description": "차세대 애플리케이션"
+  },
+  "navigation": {
+    "home": "홈",
+    "profile": "프로필",
+    "settings": "설정",
+    "login": "로그인",
+    "register": "회원가입",
+    "logout": "로그아웃"
+  },
+  "auth": {
+    "email": "이메일",
+    "password": "비밀번호",
+    "confirmPassword": "비밀번호 확인",
+    "forgotPassword": "비밀번호를 잊으셨나요?",
+    "loginButton": "로그인",
+    "registerButton": "회원가입",
+    "nameLabel": "이름"
+  },
+  "profile": {
+    "title": "프로필",
+    "bio": "자기소개",
+    "phoneNumber": "전화번호",
+    "updateProfile": "프로필 업데이트"
+  },
+  "settings": {
+    "title": "설정",
+    "language": "언어",
+    "theme": "테마",
+    "notifications": "알림",
+    "save": "변경사항 저장"
+  },
+  "common": {
+    "loading": "로딩 중...",
+    "error": "오류가 발생했습니다",
+    "success": "성공!",
+    "cancel": "취소",
+    "save": "저장",
+    "delete": "삭제",
+    "edit": "편집"
+  }
+}

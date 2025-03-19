@@ -1,5 +1,5 @@
 // app/(auth)/register/page.tsx
-import RegisterForm from "@/app/components/RegisterForm";
+import RegisterForm from "@/app/[locale]/components/RegisterForm";
 
 export default function RegisterPage() {
   return (
