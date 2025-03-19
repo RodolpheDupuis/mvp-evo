@@ -3,7 +3,9 @@
 // navigation.ts
 import { useRouter as useNextRouter, usePathname as useNextPathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import Link from 'next/link';
+import NextLink from 'next/link';
+import type { ComponentProps } from 'react';
+import { forwardRef } from 'react';
 
 export const locales = ['en', 'fr', 'kr'];
 export const localePrefix = 'as-needed';
@@ -44,5 +46,5 @@ export function usePathname() {
 // Re-export redirect from next/navigation
 export { redirect } from 'next/navigation';
 
-// Export Link component
-export { Link };
+// Re-export Link from next/link for use in the app
+export { default as Link } from 'next/link';
