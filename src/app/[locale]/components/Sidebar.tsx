@@ -4,6 +4,7 @@
 import { Link } from "~/navigation";
 import { useLocale } from 'next-intl';
 import { Card } from "@/app/[locale]/components/ui/card";
+import { toast } from "sonner";
 
 export default function Sidebar() {
   const locale = useLocale();
@@ -11,6 +12,37 @@ export default function Sidebar() {
   // Function to create localized href
   const getLocalizedHref = (path: string) => {
     return `/${locale}${path}`;
+  };
+  
+  // Function to send a test email
+  const sendTestEmail = async () => {
+    try {
+      toast.info("Sending test email...");
+      
+      const response = await fetch(`/${locale}/api/email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'welcome',
+          email: 'rodolphe.dupuis02@gmail.com',
+          name: 'Rodolphe',
+          locale
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success("Test email sent successfully!");
+      } else {
+        toast.error(`Failed to send email: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      toast.error(`Error sending email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
   
   return (
@@ -27,6 +59,14 @@ export default function Sidebar() {
         </li>
         <li>
           <Link href={getLocalizedHref('/profile')} className="block px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">Profile</Link>
+        </li>
+        <li>
+          <button 
+            onClick={sendTestEmail}
+            className="w-full text-left px-4 py-2 bg-indigo-700 rounded hover:bg-indigo-600 flex items-center"
+          >
+            <span className="mr-2">✉️</span> Send Test Email
+          </button>
         </li>
       </ul>
     </aside>
