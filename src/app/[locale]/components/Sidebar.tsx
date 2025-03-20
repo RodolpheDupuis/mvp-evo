@@ -4,14 +4,21 @@
 import { Link } from "~/navigation";
 import { useLocale } from 'next-intl';
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-export default function Sidebar() {
+export default function Sidebar({ onCollapseChange }: { onCollapseChange?: (collapsed: boolean) => void }) {
   const locale = useLocale();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Notify parent component when collapse state changes
+  useEffect(() => {
+    if (onCollapseChange) {
+      onCollapseChange(isCollapsed);
+    }
+  }, [isCollapsed, onCollapseChange]);
 
   // Function to create localized href
   const getLocalizedHref = (path: string) => {
@@ -65,7 +72,7 @@ export default function Sidebar() {
   
   return (
     <aside 
-      className={`bg-gradient-to-br from-indigo-950 to-slate-900 text-white h-screen shadow-xl flex flex-col transition-all duration-300 ease-in-out ${isCollapsed ? 'w-24' : 'w-64'}`}
+      className={`bg-gradient-to-br from-indigo-950 to-slate-900 text-white h-screen shadow-xl flex flex-col transition-all duration-300 ease-in-out fixed top-0 left-0 z-10 ${isCollapsed ? 'w-24' : 'w-64'}`}
     >
       <div className={`flex items-center justify-between p-5 ${isCollapsed ? 'px-3 py-5' : 'px-3 py-5'}`}>
         <h1 
@@ -124,6 +131,17 @@ export default function Sidebar() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <span className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'} ${isLinkActive('/profile') ? 'font-medium' : ''}`}>Profile</span>
+            </Link>
+          </li>
+          <li>
+            <Link 
+              href={getLocalizedHref('/ui-showcase')} 
+              className={`flex items-center py-2.5 rounded-lg transition-all duration-200 group ${isCollapsed ? 'justify-center px-0' : 'px-3'} ${isLinkActive('/ui-showcase') ? 'bg-white/10' : 'hover:bg-white/10'}`}
+            >
+              <svg className={`w-5 h-5 text-blue-400 group-hover:text-blue-300 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'} ${isLinkActive('/ui-showcase') ? 'text-blue-300' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+              </svg>
+              <span className={`transition-all duration-300 ${isCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'} ${isLinkActive('/ui-showcase') ? 'font-medium' : ''}`}>UI Showcase</span>
             </Link>
           </li>
         </ul>
