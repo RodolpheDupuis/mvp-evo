@@ -18,7 +18,19 @@
     "forgotPassword": "Mot de passe oublié ?",
     "loginButton": "Se connecter",
     "registerButton": "S'inscrire",
-    "nameLabel": "Nom"
+    "nameLabel": "Nom",
+    "loginTitle": "Connectez-vous à votre compte",
+    "loginError": "Email ou mot de passe invalide",
+    "rememberMe": "Se souvenir de moi",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUp": "Inscrivez-vous gratuitement",
+    "emailPlaceholder": "vous@exemple.com",
+    "passwordPlaceholder": "••••••••",
+    "registerTitle": "Créez votre compte",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "registerError": "L'inscription a échoué. Veuillez réessayer.",
+    "passwordRequirements": "Le mot de passe doit comporter au moins 8 caractères",
+    "passwordMismatch": "Les mots de passe ne correspondent pas"
   },
   "profile": {
     "title": "Profil",
@@ -35,10 +47,11 @@
   },
   "common": {
     "loading": "Chargement...",
-    "error": "Une erreur est survenue",
+    "error": "Une erreur s'est produite",
     "success": "Succès !",
     "cancel": "Annuler",
     "save": "Enregistrer",
+    "submit": "Soumettre",
     "delete": "Supprimer",
     "edit": "Modifier"
   }

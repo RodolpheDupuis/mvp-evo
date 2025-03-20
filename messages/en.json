@@ -16,9 +16,21 @@
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot Password?",
-    "loginButton": "Login",
+    "loginButton": "Sign in",
     "registerButton": "Register",
-    "nameLabel": "Name"
+    "nameLabel": "Name",
+    "loginTitle": "Sign in to your account",
+    "loginError": "Invalid email or password",
+    "rememberMe": "Remember me",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up for free",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "••••••••",
+    "registerTitle": "Create your account",
+    "haveAccount": "Already have an account?",
+    "registerError": "Registration failed. Please try again.",
+    "passwordRequirements": "Password must be at least 8 characters",
+    "passwordMismatch": "Passwords do not match"
   },
   "profile": {
     "title": "Profile",
@@ -39,7 +51,7 @@
     "success": "Success!",
     "cancel": "Cancel",
     "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit"
+    "submit": "Submit",
+    "delete": "Delete"
   }
 }

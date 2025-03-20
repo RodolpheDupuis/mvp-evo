@@ -6,7 +6,9 @@ import { usePathname } from "~/navigation";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = pathname === "/login" || pathname === "/register" || pathname?.startsWith("/(auth)");
+  
+  // Check if the current path is an auth page
+  const isAuthPage = pathname.includes("/login") || pathname.includes("/register");
 
   if (isAuthPage) {
     return <>{children}</>;
