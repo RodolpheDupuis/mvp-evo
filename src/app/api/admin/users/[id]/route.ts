@@ -32,13 +32,15 @@ async function isAdmin(request: NextRequest) {
 // GET /api/admin/users/[id] - Get a specific user
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<any> }
 ) {
   try {
     // For demo purposes, we'll skip the admin check
     // In a real app, you would verify the user's admin status here
 
-    const userId = params.id;
+    // Resolve params if it's a Promise
+    const resolvedParams = params ? await params : { id: '' };
+    const userId = resolvedParams.id;
 
     // Get user from database
     const user = await prisma.user.findUnique({
@@ -70,13 +72,15 @@ export async function GET(
 // PUT /api/admin/users/[id] - Update a user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<any> }
 ) {
   try {
     // For demo purposes, we'll skip the admin check
     // In a real app, you would verify the user's admin status here
 
-    const userId = params.id;
+    // Resolve params if it's a Promise
+    const resolvedParams = params ? await params : { id: '' };
+    const userId = resolvedParams.id;
     const data = await request.json();
 
     // Update user in database
@@ -110,13 +114,15 @@ export async function PUT(
 // DELETE /api/admin/users/[id] - Delete a user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<any> }
 ) {
   try {
     // For demo purposes, we'll skip the admin check
     // In a real app, you would verify the user's admin status here
 
-    const userId = params.id;
+    // Resolve params if it's a Promise
+    const resolvedParams = params ? await params : { id: '' };
+    const userId = resolvedParams.id;
 
     // Delete user from database
     await prisma.user.delete({

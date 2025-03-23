@@ -9,6 +9,7 @@
 - **데이터베이스**: PostgreSQL과 Prisma ORM
 - **UI**: TailwindCSS와 shadcn/ui 컴포넌트
 - **국제화**: next-intl을 사용한 완전한 i18n 지원 (영어, 프랑스어, 한국어)
+- **관리자 대시보드**: 사용자 관리를 위한 완전한 관리자 인터페이스
 - **배포**: Vercel 배포에 최적화
 
 ## 구성 가이드
@@ -23,7 +24,9 @@
 4. [데이터베이스 구성](#데이터베이스-구성)
 5. [UI 커스터마이징](#ui-커스터마이징)
 6. [국제화](#국제화)
-7. [배포](#배포)
+7. [관리자 대시보드](#관리자-대시보드)
+8. [API 라우트](#api-라우트)
+9. [배포](#배포)
 
 ## 환경 변수
 
@@ -440,6 +443,275 @@ export default function ClientTaskList({ userId }: { userId: string }) {
 
 이 모듈식 접근 방식을 통해 깔끔하고 체계적인 코드베이스를 유지하면서 애플리케이션에 새로운 데이터 모델과 핸들러를 쉽게 추가할 수 있습니다.
 
+## 국제화
+
+이 보일러플레이트는 next-intl을 사용하여 여러 언어를 지원합니다.
+
+### 지원 언어
+
+- 영어 (en) - 기본값
+- 프랑스어 (fr)
+- 한국어 (kr)
+
+### 번역 추가
+
+1. 번역은 `messages` 디렉토리의 JSON 파일에 저장됩니다
+2. 각 언어 파일에서 번역을 추가하거나 수정하세요:
+   - `messages/en.json`
+   - `messages/fr.json`
+   - `messages/kr.json`
+
+### 번역 사용
+
+클라이언트 컴포넌트에서:
+```jsx
+'use client';
+import { useTranslations } from 'next-intl';
+
+export default function MyComponent() {
+  const t = useTranslations('namespace');
+  return <div>{t('key')}</div>;
+}
+```
+
+서버 컴포넌트에서:
+```jsx
+import { getTranslations } from 'next-intl/server';
+
+export default async function MyServerComponent() {
+  const t = await getTranslations('namespace');
+  return <div>{t('key')}</div>;
+}
+```
+
+### 로케일을 사용한 네비게이션
+
+Next.js 네비게이션 대신 `@/navigation`의 커스텀 네비게이션 유틸리티를 사용하세요:
+
+```jsx
+import { Link, useRouter } from '@/navigation';
+
+// 링크용
+<Link href="/dashboard">대시보드</Link>
+
+// 프로그래밍 방식 네비게이션
+const router = useRouter();
+router.push('/dashboard');
+```
+
+### 로케일 구조
+
+애플리케이션은 국제화를 위한 Next.js App Router 규칙을 따릅니다:
+
+1. 모든 지역화된 페이지와 컴포넌트는 `src/app/[locale]/` 디렉토리에 위치합니다
+2. API 라우트는 `src/app/api/` 디렉토리에 위치합니다 (로케일 구조 외부)
+3. 미들웨어는 사용자를 선호하는 로케일로 리디렉션하는 역할을 합니다
+
+## 관리자 대시보드
+
+이 보일러플레이트는 사용자 및 애플리케이션 설정 관리를 위한 완전한 관리자 대시보드를 포함합니다.
+
+### 관리자 기능
+
+- 사용자 관리 (사용자 보기, 생성, 업데이트, 삭제)
+- 역할 기반 접근 제어
+- 지역화된 관리자 인터페이스
+
+### 관리자 라우트
+
+관리자 대시보드는 `/admin`에서 접근 가능하며 인증으로 보호됩니다. 관리자 권한이 있는 사용자만 접근할 수 있습니다.
+
+### 관리자 컴포넌트
+
+관리자 대시보드는 `src/app/[locale]/admin/components/`에 위치한 재사용 가능한 컴포넌트로 구성되어 있습니다:
+
+- `UserList.tsx`: 사용자 표시 및 관리를 위한 컴포넌트
+- `AdminNav.tsx`: 관리자 대시보드용 네비게이션 컴포넌트
+- `AdminLayout.tsx`: 관리자 대시보드용 레이아웃 컴포넌트
+
+### 관리자 기능 추가
+
+관리자 대시보드에 새로운 기능을 추가하려면:
+
+1. `src/app/[locale]/admin/components/`에 새 컴포넌트 생성
+2. `src/app/[locale]/admin/`의 적절한 페이지에 컴포넌트 추가
+3. `src/app/api/admin/`에 필요한 API 라우트 추가
+
+## API 라우트
+
+이 보일러플레이트는 서버 측 작업을 위해 Next.js API 라우트를 사용합니다. Next.js 15에서는 API 라우트 핸들러가 동적 매개변수를 Promise로 처리하도록 업데이트되었습니다.
+
+### API 라우트 구조
+
+API 라우트는 사용자의 로케일에 관계없이 접근 가능하도록 `src/app/api/` 디렉토리(로케일 구조 외부)에 위치합니다.
+
+### API 라우트 생성
+
+새 API 라우트를 생성하려면:
+
+1. `src/app/api/` 디렉토리에 새 파일 생성 (예: `src/app/api/tasks/route.ts`)
+2. 필요한 HTTP 메서드(GET, POST, PUT, DELETE)에 대한 핸들러 함수 구현
+
+Next.js 15와 호환되는 API 라우트 예제:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+// GET /api/tasks
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Promise인 경우 매개변수 해결
+    const resolvedParams = await params;
+    
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    
+    if (userId) {
+      const tasks = await prisma.task.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' }
+      });
+      return NextResponse.json(tasks);
+    } else {
+      return NextResponse.json({ error: 'userId 매개변수가 누락되었습니다' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('작업 검색 중 오류 발생:', error);
+    return NextResponse.json({ error: '작업 검색 실패' }, { status: 500 });
+  }
+}
+
+// POST /api/tasks
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Promise인 경우 매개변수 해결
+    const resolvedParams = await params;
+    
+    const data = await request.json();
+    
+    // 필수 필드 검증
+    if (!data.title || !data.userId) {
+      return NextResponse.json({ error: '제목과 userId가 필요합니다' }, { status: 400 });
+    }
+    
+    // 데이터베이스에 작업 생성
+    const task = await prisma.task.create({
+      data: {
+        title: data.title,
+        description: data.description || '',
+        completed: data.completed || false,
+        userId: data.userId
+      }
+    });
+    
+    return NextResponse.json(task, { status: 201 });
+  } catch (error) {
+    console.error('작업 생성 중 오류 발생:', error);
+    return NextResponse.json({ error: '작업 생성 실패' }, { status: 500 });
+  }
+}
+```
+
+### 동적 라우트 매개변수
+
+`/api/tasks/[id]`와 같은 동적 라우트의 경우, 대괄호 안에 매개변수 이름이 있는 디렉토리를 만들고 그 안에 `route.ts` 파일을 생성합니다:
+
+```
+src/app/api/tasks/[id]/route.ts
+```
+
+Next.js 15와 호환되는 동적 라우트 핸들러 예제:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+// GET /api/tasks/[id]
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Promise인 경우 매개변수 해결
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    const task = await prisma.task.findUnique({
+      where: { id: taskId }
+    });
+    
+    if (!task) {
+      return NextResponse.json({ error: '작업을 찾을 수 없습니다' }, { status: 404 });
+    }
+    
+    return NextResponse.json(task);
+  } catch (error) {
+    console.error('작업 검색 중 오류 발생:', error);
+    return NextResponse.json({ error: '작업 검색 실패' }, { status: 500 });
+  }
+}
+
+// PUT /api/tasks/[id]
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Promise인 경우 매개변수 해결
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    const data = await request.json();
+    
+    const task = await prisma.task.update({
+      where: { id: taskId },
+      data
+    });
+    
+    return NextResponse.json(task);
+  } catch (error) {
+    console.error('작업 업데이트 중 오류 발생:', error);
+    return NextResponse.json({ error: '작업 업데이트 실패' }, { status: 500 });
+  }
+}
+
+// DELETE /api/tasks/[id]
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Promise인 경우 매개변수 해결
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    await prisma.task.delete({
+      where: { id: taskId }
+    });
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('작업 삭제 중 오류 발생:', error);
+    return NextResponse.json({ error: '작업 삭제 실패' }, { status: 500 });
+  }
+}
+```
+
+### API 라우트 모범 사례
+
+1. API 라우트는 항상 `src/app/api/` 디렉토리(로케일 구조 외부)에 배치
+2. Next.js 15와의 호환성을 위해 매개변수를 Promise로 처리
+3. 적절한 오류 처리 및 상태 코드 사용
+4. 처리 전 입력 데이터 검증
+5. 데이터베이스 작업에 Prisma 사용
+
 ## UI 커스터마이징
 
 ### TailwindCSS
@@ -463,62 +735,6 @@ npx shadcn-ui add button
 테마 커스터마이징:
 1. `components.json`의 `style` 수정 (기본값은 "new-york")
 2. `components.json`의 `baseColor` 업데이트
-
-## 국제화
-
-보일러플레이트는 next-intl을 사용하여 여러 언어를 지원합니다.
-
-### 지원 언어
-
-- 영어 (en) - 기본값
-- 프랑스어 (fr)
-- 한국어 (kr)
-
-### 번역 추가
-
-1. 번역은 `messages` 디렉토리의 JSON 파일에 저장됩니다
-2. 각 언어 파일에서 번역 추가 또는 수정:
-   - `messages/en.json`
-   - `messages/fr.json`
-   - `messages/kr.json`
-
-### 번역 사용
-
-클라이언트 컴포넌트에서:
-```jsx
-'use client';
-import { useTranslations } from 'next-intl';
-
-export default function MyComponent() {
-  const t = useTranslations('네임스페이스');
-  return <div>{t('키')}</div>;
-}
-```
-
-서버 컴포넌트에서:
-```jsx
-import { getTranslations } from 'next-intl/server';
-
-export default async function MyServerComponent() {
-  const t = await getTranslations('네임스페이스');
-  return <div>{t('키')}</div>;
-}
-```
-
-### 로케일이 있는 네비게이션
-
-Next.js 네비게이션 대신 `@/navigation`의 사용자 정의 네비게이션 유틸리티 사용:
-
-```jsx
-import { Link, useRouter } from '@/navigation';
-
-// 링크용
-<Link href="/dashboard">대시보드</Link>
-
-// 프로그래매틱 네비게이션
-const router = useRouter();
-router.push('/dashboard');
-```
 
 ## 배포
 

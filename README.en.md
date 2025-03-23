@@ -9,6 +9,7 @@ A modern, feature-rich Next.js boilerplate with authentication, payment processi
 - **Database**: PostgreSQL with Prisma ORM
 - **UI**: TailwindCSS with shadcn/ui components
 - **Internationalization**: Full i18n support with next-intl (English, French, Korean)
+- **Admin Dashboard**: Complete admin interface for user management
 - **Deployment**: Optimized for Vercel deployment
 
 ## Configuration Guide
@@ -23,7 +24,9 @@ This document will guide you through configuring all aspects of the MVP EVO boil
 4. [Database Configuration](#database-configuration)
 5. [UI Customization](#ui-customization)
 6. [Internationalization](#internationalization)
-7. [Deployment](#deployment)
+7. [Admin Dashboard](#admin-dashboard)
+8. [API Routes](#api-routes)
+9. [Deployment](#deployment)
 
 ## Environment Variables
 
@@ -519,6 +522,219 @@ import { Link, useRouter } from '@/navigation';
 const router = useRouter();
 router.push('/dashboard');
 ```
+
+### Locale Structure
+
+The application follows the Next.js App Router conventions for internationalization:
+
+1. All localized pages and components are placed in the `src/app/[locale]/` directory
+2. API routes are placed in the `src/app/api/` directory (outside the locale structure)
+3. The middleware handles redirecting users to their preferred locale
+
+## Admin Dashboard
+
+The boilerplate includes a complete admin dashboard for managing users and application settings.
+
+### Admin Features
+
+- User management (view, create, update, delete users)
+- Role-based access control
+- Localized admin interface
+
+### Admin Routes
+
+The admin dashboard is accessible at `/admin` and is protected by authentication. Only users with admin privileges can access it.
+
+### Admin Components
+
+The admin dashboard is built with reusable components located in `src/app/[locale]/admin/components/`:
+
+- `UserList.tsx`: Component for displaying and managing users
+- `AdminNav.tsx`: Navigation component for the admin dashboard
+- `AdminLayout.tsx`: Layout component for the admin dashboard
+
+### Adding Admin Features
+
+To add new features to the admin dashboard:
+
+1. Create a new component in `src/app/[locale]/admin/components/`
+2. Add the component to the appropriate page in `src/app/[locale]/admin/`
+3. Add any necessary API routes in `src/app/api/admin/`
+
+## API Routes
+
+The boilerplate uses Next.js API routes for server-side operations. With Next.js 15, the API route handlers have been updated to handle dynamic parameters as Promises.
+
+### API Route Structure
+
+API routes are located in the `src/app/api/` directory (outside the locale structure) to ensure they're accessible regardless of the user's locale.
+
+### Creating API Routes
+
+To create a new API route:
+
+1. Create a new file in `src/app/api/` directory, e.g., `src/app/api/tasks/route.ts`
+2. Implement the handler functions for the HTTP methods you need (GET, POST, PUT, DELETE)
+
+Example API route with Next.js 15 compatibility:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+// GET /api/tasks
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Resolve params if it's a Promise
+    const resolvedParams = await params;
+    
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    
+    if (userId) {
+      const tasks = await prisma.task.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' }
+      });
+      return NextResponse.json(tasks);
+    } else {
+      return NextResponse.json({ error: 'Missing userId parameter' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    return NextResponse.json({ error: 'Failed to fetch tasks' }, { status: 500 });
+  }
+}
+
+// POST /api/tasks
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Resolve params if it's a Promise
+    const resolvedParams = await params;
+    
+    const data = await request.json();
+    
+    // Validate required fields
+    if (!data.title || !data.userId) {
+      return NextResponse.json({ error: 'Title and userId are required' }, { status: 400 });
+    }
+    
+    // Create task in database
+    const task = await prisma.task.create({
+      data: {
+        title: data.title,
+        description: data.description || '',
+        completed: data.completed || false,
+        userId: data.userId
+      }
+    });
+    
+    return NextResponse.json(task, { status: 201 });
+  } catch (error) {
+    console.error('Error creating task:', error);
+    return NextResponse.json({ error: 'Failed to create task' }, { status: 500 });
+  }
+}
+```
+
+### Dynamic Route Parameters
+
+For dynamic routes like `/api/tasks/[id]`, create a directory with the parameter name in brackets and a `route.ts` file inside:
+
+```
+src/app/api/tasks/[id]/route.ts
+```
+
+Example dynamic route handler with Next.js 15 compatibility:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+// GET /api/tasks/[id]
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Resolve params if it's a Promise
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    const task = await prisma.task.findUnique({
+      where: { id: taskId }
+    });
+    
+    if (!task) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+    }
+    
+    return NextResponse.json(task);
+  } catch (error) {
+    console.error('Error fetching task:', error);
+    return NextResponse.json({ error: 'Failed to fetch task' }, { status: 500 });
+  }
+}
+
+// PUT /api/tasks/[id]
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Resolve params if it's a Promise
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    const data = await request.json();
+    
+    const task = await prisma.task.update({
+      where: { id: taskId },
+      data
+    });
+    
+    return NextResponse.json(task);
+  } catch (error) {
+    console.error('Error updating task:', error);
+    return NextResponse.json({ error: 'Failed to update task' }, { status: 500 });
+  }
+}
+
+// DELETE /api/tasks/[id]
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Resolve params if it's a Promise
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    await prisma.task.delete({
+      where: { id: taskId }
+    });
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 });
+  }
+}
+```
+
+### API Route Best Practices
+
+1. Always place API routes in `src/app/api/` directory (outside the locale structure)
+2. Handle params as a Promise for Next.js 15 compatibility
+3. Use proper error handling and status codes
+4. Validate input data before processing
+5. Use Prisma for database operations
 
 ## Deployment
 

@@ -9,6 +9,7 @@ Un boilerplate Next.js moderne et riche en fonctionnalités avec authentificatio
 - **Base de données** : PostgreSQL avec ORM Prisma
 - **Interface utilisateur** : TailwindCSS avec composants shadcn/ui
 - **Internationalisation** : Support i18n complet avec next-intl (Anglais, Français, Coréen)
+- **Tableau de bord administrateur** : Interface d'administration complète pour la gestion des utilisateurs
 - **Déploiement** : Optimisé pour le déploiement sur Vercel
 
 ## Guide de configuration
@@ -23,7 +24,9 @@ Ce document vous guidera à travers la configuration de tous les aspects du boil
 4. [Configuration de la base de données](#configuration-de-la-base-de-données)
 5. [Personnalisation de l'interface utilisateur](#personnalisation-de-linterface-utilisateur)
 6. [Internationalisation](#internationalisation)
-7. [Déploiement](#déploiement)
+7. [Tableau de bord administrateur](#tableau-de-bord-administrateur)
+8. [Routes API](#routes-api)
+9. [Déploiement](#déploiement)
 
 ## Variables d'environnement
 
@@ -440,30 +443,6 @@ export default function ClientTaskList({ userId }: { userId: string }) {
 
 Cette approche modulaire vous permet d'ajouter facilement de nouveaux modèles de données et gestionnaires à votre application tout en maintenant une base de code propre et organisée.
 
-## Personnalisation de l'interface utilisateur
-
-### TailwindCSS
-
-Le boilerplate utilise TailwindCSS pour le style. La configuration se trouve dans `tailwind.config.ts`.
-
-Pour personnaliser :
-1. Modifiez la section `theme` dans `tailwind.config.ts`
-2. Ajoutez votre CSS personnalisé dans `src/app/globals.css`
-
-### shadcn/ui
-
-Le boilerplate intègre shadcn/ui pour des composants d'interface utilisateur de haute qualité. La configuration se trouve dans `components.json`.
-
-Pour ajouter de nouveaux composants :
-
-```bash
-npx shadcn-ui add button
-```
-
-Pour personnaliser le thème :
-1. Modifiez le `style` dans `components.json` (par défaut, c'est "new-york")
-2. Mettez à jour la `baseColor` dans `components.json`
-
 ## Internationalisation
 
 Le boilerplate prend en charge plusieurs langues avec next-intl.
@@ -490,8 +469,8 @@ Dans les composants client :
 import { useTranslations } from 'next-intl';
 
 export default function MonComposant() {
-  const t = useTranslations('espace_de_noms');
-  return <div>{t('clé')}</div>;
+  const t = useTranslations('namespace');
+  return <div>{t('key')}</div>;
 }
 ```
 
@@ -500,8 +479,8 @@ Dans les composants serveur :
 import { getTranslations } from 'next-intl/server';
 
 export default async function MonComposantServeur() {
-  const t = await getTranslations('espace_de_noms');
-  return <div>{t('clé')}</div>;
+  const t = await getTranslations('namespace');
+  return <div>{t('key')}</div>;
 }
 ```
 
@@ -519,6 +498,219 @@ import { Link, useRouter } from '@/navigation';
 const router = useRouter();
 router.push('/tableau-de-bord');
 ```
+
+### Structure des locales
+
+L'application suit les conventions du App Router de Next.js pour l'internationalisation :
+
+1. Toutes les pages et composants localisés sont placés dans le répertoire `src/app/[locale]/`
+2. Les routes API sont placées dans le répertoire `src/app/api/` (en dehors de la structure des locales)
+3. Le middleware gère la redirection des utilisateurs vers leur locale préférée
+
+## Tableau de bord administrateur
+
+Le boilerplate inclut un tableau de bord d'administration complet pour la gestion des utilisateurs et des paramètres de l'application.
+
+### Fonctionnalités d'administration
+
+- Gestion des utilisateurs (affichage, création, mise à jour, suppression des utilisateurs)
+- Contrôle d'accès basé sur les rôles
+- Interface d'administration localisée
+
+### Routes d'administration
+
+Le tableau de bord d'administration est accessible à `/admin` et est protégé par l'authentification. Seuls les utilisateurs disposant de privilèges d'administrateur peuvent y accéder.
+
+### Composants d'administration
+
+Le tableau de bord d'administration est construit avec des composants réutilisables situés dans `src/app/[locale]/admin/components/` :
+
+- `UserList.tsx` : Composant pour afficher et gérer les utilisateurs
+- `AdminNav.tsx` : Composant de navigation pour le tableau de bord d'administration
+- `AdminLayout.tsx` : Composant de mise en page pour le tableau de bord d'administration
+
+### Ajout de fonctionnalités d'administration
+
+Pour ajouter de nouvelles fonctionnalités au tableau de bord d'administration :
+
+1. Créez un nouveau composant dans `src/app/[locale]/admin/components/`
+2. Ajoutez le composant à la page appropriée dans `src/app/[locale]/admin/`
+3. Ajoutez les routes API nécessaires dans `src/app/api/admin/`
+
+## Routes API
+
+Le boilerplate utilise les routes API de Next.js pour les opérations côté serveur. Avec Next.js 15, les gestionnaires de routes API ont été mis à jour pour gérer les paramètres dynamiques en tant que Promesses.
+
+### Structure des routes API
+
+Les routes API sont situées dans le répertoire `src/app/api/` (en dehors de la structure des locales) pour garantir qu'elles sont accessibles quelle que soit la locale de l'utilisateur.
+
+### Création de routes API
+
+Pour créer une nouvelle route API :
+
+1. Créez un nouveau fichier dans le répertoire `src/app/api/`, par exemple, `src/app/api/tasks/route.ts`
+2. Implémentez les fonctions de gestionnaire pour les méthodes HTTP dont vous avez besoin (GET, POST, PUT, DELETE)
+
+Exemple de route API compatible avec Next.js 15 :
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+// GET /api/tasks
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Résoudre les paramètres s'il s'agit d'une Promesse
+    const resolvedParams = await params;
+    
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+    
+    if (userId) {
+      const tasks = await prisma.task.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' }
+      });
+      return NextResponse.json(tasks);
+    } else {
+      return NextResponse.json({ error: 'Paramètre userId manquant' }, { status: 400 });
+    }
+  } catch (error) {
+    console.error('Erreur lors de la récupération des tâches :', error);
+    return NextResponse.json({ error: 'Échec de la récupération des tâches' }, { status: 500 });
+  }
+}
+
+// POST /api/tasks
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Résoudre les paramètres s'il s'agit d'une Promesse
+    const resolvedParams = await params;
+    
+    const data = await request.json();
+    
+    // Valider les champs requis
+    if (!data.title || !data.userId) {
+      return NextResponse.json({ error: 'Le titre et l\'userId sont requis' }, { status: 400 });
+    }
+    
+    // Créer une tâche dans la base de données
+    const task = await prisma.task.create({
+      data: {
+        title: data.title,
+        description: data.description || '',
+        completed: data.completed || false,
+        userId: data.userId
+      }
+    });
+    
+    return NextResponse.json(task, { status: 201 });
+  } catch (error) {
+    console.error('Erreur lors de la création de la tâche :', error);
+    return NextResponse.json({ error: 'Échec de la création de la tâche' }, { status: 500 });
+  }
+}
+```
+
+### Paramètres de route dynamiques
+
+Pour les routes dynamiques comme `/api/tasks/[id]`, créez un répertoire avec le nom du paramètre entre crochets et un fichier `route.ts` à l'intérieur :
+
+```
+src/app/api/tasks/[id]/route.ts
+```
+
+Exemple de gestionnaire de route dynamique compatible avec Next.js 15 :
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+
+// GET /api/tasks/[id]
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Résoudre les paramètres s'il s'agit d'une Promesse
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    const task = await prisma.task.findUnique({
+      where: { id: taskId }
+    });
+    
+    if (!task) {
+      return NextResponse.json({ error: 'Tâche non trouvée' }, { status: 404 });
+    }
+    
+    return NextResponse.json(task);
+  } catch (error) {
+    console.error('Erreur lors de la récupération de la tâche :', error);
+    return NextResponse.json({ error: 'Échec de la récupération de la tâche' }, { status: 500 });
+  }
+}
+
+// PUT /api/tasks/[id]
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Résoudre les paramètres s'il s'agit d'une Promesse
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    const data = await request.json();
+    
+    const task = await prisma.task.update({
+      where: { id: taskId },
+      data
+    });
+    
+    return NextResponse.json(task);
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de la tâche :', error);
+    return NextResponse.json({ error: 'Échec de la mise à jour de la tâche' }, { status: 500 });
+  }
+}
+
+// DELETE /api/tasks/[id]
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<any> }
+) {
+  try {
+    // Résoudre les paramètres s'il s'agit d'une Promesse
+    const resolvedParams = await params;
+    const taskId = resolvedParams.id;
+    
+    await prisma.task.delete({
+      where: { id: taskId }
+    });
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Erreur lors de la suppression de la tâche :', error);
+    return NextResponse.json({ error: 'Échec de la suppression de la tâche' }, { status: 500 });
+  }
+}
+```
+
+### Meilleures pratiques pour les routes API
+
+1. Placez toujours les routes API dans le répertoire `src/app/api/` (en dehors de la structure des locales)
+2. Gérez les paramètres comme une Promesse pour la compatibilité avec Next.js 15
+3. Utilisez une gestion appropriée des erreurs et des codes d'état
+4. Validez les données d'entrée avant le traitement
+5. Utilisez Prisma pour les opérations de base de données
 
 ## Déploiement
 
