@@ -9,15 +9,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
-  // Check if the current path is an auth page
+  // Check if the current path is an auth page or admin page
   const isAuthPage = pathname.includes("/login") || pathname.includes("/register");
+  const isAdminPage = pathname.includes("/admin");
 
   // Function to handle sidebar collapse state changes
   const handleSidebarCollapse = (collapsed: boolean) => {
     setSidebarCollapsed(collapsed);
   };
 
-  if (isAuthPage) {
+  // Don't show sidebar and navbar for auth pages and admin pages
+  if (isAuthPage || isAdminPage) {
     return <>{children}</>;
   }
 

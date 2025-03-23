@@ -7,6 +7,7 @@ import { Button } from "@/app/[locale]/components/ui/button";
 import { Toaster } from "@/app/[locale]/components/ui/sonner";
 import { toast } from "sonner"; 
 import LanguageSwitcher from "@/app/[locale]/components/LanguageSwitcher";
+import { ThemeToggle } from "@/app/[locale]/components/ThemeToggle";
 import { useTranslations } from 'next-intl';
 
 export default function Navbar() {
@@ -30,7 +31,8 @@ export default function Navbar() {
         </h1>
       </div>
       <div className="flex items-center gap-4">
-        <div className=" backdrop-blur-sm rounded-lg">
+        <ThemeToggle />
+        <div className="backdrop-blur-sm rounded-lg">
           <LanguageSwitcher />
         </div>
         <Button 

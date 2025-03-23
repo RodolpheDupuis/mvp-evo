@@ -23,7 +23,7 @@ export default function LoginForm() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // Always include locale in path
-      router.push(`/${locale}/home`);
+      router.push(`/home`);
     } catch (err) {
       setError(t('loginError'));
       console.error(err);

@@ -490,13 +490,13 @@ export default function UiShowcase() {
               
               <h3 className="text-lg font-medium mt-8">Button Variants</h3>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="flex gap-2">
                   <Button>Default</Button>
                   <Button variant="secondary">Secondary</Button>
                   <Button variant="destructive">Destructive</Button>
                   <Button variant="outline">Outline</Button>
                 </div>
-                <div className="space-y-2">
+                <div className="flex gap-2">
                   <Button variant="ghost">Ghost</Button>
                   <Button variant="link">Link</Button>
                   <Button disabled>Disabled</Button>

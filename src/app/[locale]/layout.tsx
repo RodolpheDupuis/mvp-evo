@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
 import "./globals.css";
 import Layout from "@/app/[locale]/components/Layout";
 import { NextIntlClientProvider } from 'next-intl';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { ThemeProvider } from "@/app/[locale]/components/ThemeProvider";
 
 // Define locales directly instead of importing from navigation
 const locales = ['en', 'fr', 'kr'];
+const defaultLocale = 'en';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +31,22 @@ export function generateStaticParams() {
 
 export default async function RootLayout({
   children,
-  params: { locale }
-}: Readonly<{
+  params,
+}: {
   children: React.ReactNode;
-  params: { locale: string };
-}>) {
+  params: Promise<any> | undefined;
+}) {
+  // Resolve params if it's a Promise
+  const resolvedParams = params ? await params : { locale: defaultLocale };
+  const locale = resolvedParams.locale;
+
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale)) notFound();
+  if (!locales.includes(locale)) {
+    // If the locale is invalid, redirect to the default locale
+    // Note: We're redirecting to the default locale root
+    // The middleware will handle preserving the path
+    redirect(`/${defaultLocale}`);
+  }
 
   // Load messages for the current locale
   let messages;
@@ -46,12 +57,14 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Layout>{children}</Layout>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <Layout>{children}</Layout>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

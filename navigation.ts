@@ -9,6 +9,7 @@ import { forwardRef } from 'react';
 
 export const locales = ['en', 'fr', 'kr'];
 export const localePrefix = 'as-needed';
+export const defaultLocale = 'en';
 
 // Custom router that handles locale
 export function useRouter() {
@@ -18,13 +19,13 @@ export function useRouter() {
   return {
     ...nextRouter,
     push: (href: string, options?: any) => {
-      // Add locale to href if it's not the default locale
-      const localizedHref = locale !== 'en' ? `/${locale}${href}` : href;
+      // Always add locale to href, even for default locale
+      const localizedHref = `/${locale}${href.startsWith('/') ? href : `/${href}`}`;
       return nextRouter.push(localizedHref, options);
     },
     replace: (href: string, options?: any) => {
-      // Add locale to href if it's not the default locale
-      const localizedHref = locale !== 'en' ? `/${locale}${href}` : href;
+      // Always add locale to href, even for default locale
+      const localizedHref = `/${locale}${href.startsWith('/') ? href : `/${href}`}`;
       return nextRouter.replace(localizedHref, options);
     }
   };
@@ -36,7 +37,7 @@ export function usePathname() {
   const locale = useLocale();
   
   // If the pathname starts with the locale, remove it
-  if (locale !== 'en' && pathname.startsWith(`/${locale}`)) {
+  if (pathname.startsWith(`/${locale}`)) {
     return pathname.substring(locale.length + 1);
   }
   
